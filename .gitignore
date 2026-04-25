@@ -1,0 +1,11 @@
+# Subject files
+*.pdf
+
+# Object files
+*.o
+
+# Libraries
+*.a
+
+# Executables
+*.out
