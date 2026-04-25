@@ -1,9 +1,10 @@
-*This activity has been created as part of the 42 curriculum by yaabdall.*
+*This activity has been created as part of the 42 curriculum by yassabda.*
 
 # get_next_line
 
-## Description
+> This project follows the 42 Norme coding standard. Some implementation choices are intentional: no `for`, no `do...while`, no `switch`, etc.
 
+## Description
 `get_next_line` is a 42 C project where the goal is to implement a function that reads from a file descriptor and returns one line at a time.
 
 The function must:
@@ -13,12 +14,53 @@ The function must:
 
 This project focuses on low-level I/O (`read`), dynamic memory management, and robust edge-case handling.
 
+## Function Prototype
+
+```c
+char *get_next_line(int fd);
+```
+
+**Parameters:**
+- `fd`: The file descriptor to read from.
+
+**Returns:**
+- A dynamically allocated string containing the next line (with `\n` if present).
+- `NULL` if there is nothing else to read or if an error occurred.
+
+## Algorithm & Data Structure
+
+The implementation uses a **static remainder buffer**:
+
+1. **Initialization**: A static `char *remainder` persists across multiple calls to preserve unread data.
+
+2. **Reading loop**:
+   - While the remainder does not contain a newline and `read()` returns bytes:
+     - Read up to `BUFFER_SIZE` bytes into a temporary buffer.
+     - Append the buffer to the remainder via `ft_strjoin()`.
+     - Free old remainder and update it with the concatenated result.
+
+3. **Line extraction**:
+   - Once a newline is found (or EOF reached), extract the line up to and including the `\n`.
+   - Duplicate the leftover data for the next call.
+   - Return the extracted line.
+
+4. **Cleanup**:
+   - Free temporary allocations.
+   - Maintain the static remainder for the next invocation.
+
+### Key Design Decisions
+
+- **Static variable**: Ensures state persistence across function calls without global variables.
+- **Temporary buffer**: Bounds memory reads to `BUFFER_SIZE`, making the function scalable with different buffer sizes.
+- **String concatenation**: Uses `ft_strjoin()` to append read chunks, simplifying logic but requiring careful memory management.
+- **Efficient line extraction**: The `extract_line()` helper copies only the needed characters and stores the remainder for reuse.
+- **Error handling**: Returns `NULL` on `read()` failure or memory allocation failure, freeing all allocated memory to prevent leaks.
+
 ## Instructions
 
 ### Requirements
-
-- C compiler (`cc`/`gcc`)
-- Unix-like environment (Linux/macOS)
+- A C compiler (`cc`)
+- Standard Unix environment with `read()` syscall
 
 ### Compile
 
@@ -40,73 +82,19 @@ cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
 ./gnl
 ```
 
-Note: this repository does not provide a required `main.c` for evaluation. The compile lines above assume you use your own local test `main.c`.
-
-## Algorithm: Detailed Explanation and Justification
-
-### Selected approach
-
-The implementation uses a **static remainder buffer**:
-- After each `read`, data is appended to `remainder`.
-- When a full line is available, the function extracts that line.
-- The leftover data after that line is stored back into `remainder` for the next call.
-
-### Why this algorithm
-
-This is the standard and most reliable design for `get_next_line` because:
-- `read` returns arbitrary chunk sizes, not line-sized chunks.
-- A line can span multiple reads.
-- A read can contain multiple lines; extra bytes must be preserved for future calls.
-
-A persistent buffer between calls is therefore mandatory for correctness.
-
-### Step-by-step behavior
-
-1. Validate input (`fd >= 0`, `BUFFER_SIZE > 0`).
-2. Allocate a temporary read buffer of size `BUFFER_SIZE + 1`.
-3. While `remainder` does not contain `\n` and `read` still returns bytes:
-- Read into temporary buffer.
-- Null-terminate the chunk.
-- Concatenate chunk to `remainder`.
-4. If `remainder` is empty after reading, return `NULL`.
-5. Extract one line from `remainder`:
-- Copy chars up to `\n` (included when present).
-- Build the returned line.
-6. Duplicate the part after the extracted line into a new remainder.
-7. Free temporary allocations and return the extracted line.
-
-### Correctness notes
-
-- Handles files with or without trailing newline.
-- Handles empty files.
-- Handles very long lines (across many reads).
-- Keeps unread bytes for next call.
-- Frees stored state on read error to avoid leaks/stale state.
-
-### Complexity
-
-- Time: linear in total input size read.
-- Space: proportional to current stored remainder plus temporary read buffer.
-
-This is an appropriate trade-off for line-based streaming from file descriptors.
-
-## Technical Choices
-
-- Custom utility functions (`ft_strlen_gnl`, `ft_strchr_gnl`, `ft_strdup`, `ft_strjoin_free`) to keep dependencies explicit and controlled.
-- `ft_strjoin_free` frees previous remainder to simplify ownership and reduce leaks.
-- Header-level `BUFFER_SIZE` supports easy tuning and can be overridden with `-D BUFFER_SIZE=...`.
+**Note:** This repository does not provide a required `main.c` for evaluation. The compile lines above assume you use your own local test `main.c`.
 
 ## Resources
 
-- 42 project subject (`en.subject.pdf`) in this repository.
+References used for this project:
 - Linux `read(2)` manual: https://man7.org/linux/man-pages/man2/read.2.html
-- C memory management overview: https://en.cppreference.com/w/c/memory
+- C memory management and dynamic allocation: https://en.cppreference.com/w/c/memory
 - Static storage duration in C: https://en.cppreference.com/w/c/language/storage_duration
 
-### AI Usage
+### AI Usage Disclosure
 
-AI assistance (GitHub Copilot / GPT-5.3-Codex) was used for:
-- README drafting and wording refinement.
-- Requirement compliance check for README sections.
+AI assistance was used for:
+- README structure and formatting alignment with project standards.
+- Documentation organization and clarity improvements.
 
-AI was **not used to generate or modify the C implementation logic** in this repository.
+AI was not used to generate or modify the C implementation logic in this repository.
