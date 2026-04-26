@@ -6,72 +6,77 @@
 /*   By: yassabda <yassabda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:14:41 by yassabda          #+#    #+#             */
-/*   Updated: 2026/04/24 17:14:42 by yassabda         ###   ########.fr       */
+/*   Updated: 2026/04/26 14:09:33 by yassabda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static bool	append_buffer(char **remainder, char *buffer)
+static bool	fill_remainder(int fd, char **rem, char *buffer, size_t *rem_len)
 {
 	char	*tmp;
+	int		bytes_read;
 
-	tmp = ft_strjoin(*remainder, buffer);
-	free(*remainder);
-	*remainder = tmp;
-	if (!tmp)
-		return (false);
+	bytes_read = 1;
+	buffer[0] = '\0';
+	while (bytes_read && !ft_strchr(buffer, '\n'))
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (false);
+		buffer[bytes_read] = '\0';
+		tmp = ft_strjoin_with_len(*rem, buffer, *rem_len, bytes_read);
+		free(*rem);
+		*rem = tmp;
+		if (!*rem)
+			return (false);
+		*rem_len += bytes_read;
+	}
 	return (true);
 }
 
-static char	*extract_line(char **remainder)
+static char	*extract_line(char **rem)
 {
 	char	*line;
 	char	*tmp;
 	size_t	len;
 
 	len = 0;
-	while ((*remainder)[len] && (*remainder)[len] != '\n')
+	while ((*rem)[len] && (*rem)[len] != '\n')
 		len++;
-	if ((*remainder)[len] == '\n')
+	if ((*rem)[len] == '\n')
 		len++;
 	line = malloc(sizeof(char) * (len + 1));
 	if (!line)
 		return (NULL);
-	ft_strlcpy(line, *remainder, len + 1);
-	tmp = ft_strdup((*remainder) + len);
-	free(*remainder);
-	*remainder = tmp;
-	if (!*remainder || !**remainder)
-		(free(*remainder), *remainder = NULL);
+	ft_memcpy(line, *rem, len);
+	line[len] = '\0';
+	tmp = ft_strdup((*rem) + len);
+	free(*rem);
+	*rem = tmp;
+	if (!*rem || !**rem)
+		(free(*rem), *rem = NULL);
 	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*remainder;
+	static char	*rem;
 	char		*buffer;
-	int			bytes_read;
+	size_t		rem_len;
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	if (!remainder)
-		remainder = ft_strdup("");
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!remainder || !buffer)
-		return (free(buffer), free(remainder), remainder = NULL, NULL);
-	bytes_read = 1;
-	while (!ft_strchr(remainder, '\n') && bytes_read)
-	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == -1)
-			return (free(buffer), free(remainder), remainder = NULL, NULL);
-		buffer[bytes_read] = '\0';
-		if (append_buffer(&remainder, buffer) == false)
-			return (free(buffer), NULL);
-	}
+	if (!rem)
+		rem = ft_strdup("");
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!rem || !buffer)
+		return (free(buffer), free(rem), rem = NULL, NULL);
+	rem_len = ft_strlen(rem);
+	if (fill_remainder(fd, &rem, buffer, &rem_len) == false)
+		return (free(buffer), free(rem), rem = NULL, NULL);
 	free(buffer);
-	if (!remainder || !*remainder)
-		return (free(remainder), remainder = NULL, NULL);
-	return (extract_line(&remainder));
+	if (!rem || !*rem)
+		return (free(rem), rem = NULL, NULL);
+	return (extract_line(&rem));
 }

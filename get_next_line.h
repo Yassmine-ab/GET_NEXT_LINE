@@ -6,7 +6,7 @@
 /*   By: yassabda <yassabda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:14:45 by yassabda          #+#    #+#             */
-/*   Updated: 2026/04/26 00:05:21 by yassabda         ###   ########.fr       */
+/*   Updated: 2026/04/26 13:24:24 by yassabda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,9 @@ char	*get_next_line(int fd);
 
 char	*ft_strchr(const char *string, int searchedChar);
 char	*ft_strdup(const char *s1);
-char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strjoin_with_len(const char *s1, const char *s2,
+			size_t s1_len, size_t s2_len);
 size_t	ft_strlen(const char *s);
-size_t	ft_strlcpy(char *dst, const char *src, size_t size);
+void	*ft_memcpy(void *dest, const void *src, size_t n);
 
 #endif

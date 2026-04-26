@@ -34,9 +34,9 @@ The implementation uses a **static remainder buffer**:
 1. **Initialization**: A static `char *remainder` persists across multiple calls to preserve unread data.
 
 2. **Reading loop**:
-   - While the remainder does not contain a newline and `read()` returns bytes:
+   - While the buffer does not contain a newline and `read()` returns bytes:
      - Read up to `BUFFER_SIZE` bytes into a temporary buffer.
-     - Append the buffer to the remainder via `ft_strjoin()`.
+     - Append the buffer to the remainder.
      - Free old remainder and update it with the concatenated result.
 
 3. **Line extraction**:
@@ -85,16 +85,13 @@ cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
 **Note:** This repository does not provide a required `main.c` for evaluation. The compile lines above assume you use your own local test `main.c`.
 
 ## Resources
-
 References used for this project:
-- Linux `read(2)` manual: https://man7.org/linux/man-pages/man2/read.2.html
-- C memory management and dynamic allocation: https://en.cppreference.com/w/c/memory
+- Manual page (`man read`) for function behavior.
 - Static storage duration in C: https://en.cppreference.com/w/c/language/storage_duration
 
 ### AI Usage Disclosure
-
 AI assistance was used for:
-- README structure and formatting alignment with project standards.
-- Documentation organization and clarity improvements.
+- General debugging guidance and code review.
+- Structure and formatting of this README document.
 
 AI was not used to generate or modify the C implementation logic in this repository.

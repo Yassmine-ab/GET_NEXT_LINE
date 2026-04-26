@@ -6,7 +6,7 @@
 /*   By: yassabda <yassabda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 17:14:37 by yassabda          #+#    #+#             */
-/*   Updated: 2026/04/24 19:57:03 by yassabda         ###   ########.fr       */
+/*   Updated: 2026/04/26 14:23:17 by yassabda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,49 +35,55 @@ size_t	ft_strlen(const char *s)
 	return (len);
 }
 
-size_t	ft_strlcpy(char *dst, const char *src, size_t size)
+void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
-	size_t	src_len;
+	unsigned long		*dest_word;
+	const unsigned long	*src_word;
+	unsigned char		*dest_byte;
+	const unsigned char	*src_byte;
 
-	src_len = ft_strlen(src);
-	if (size > 0)
+	dest_word = (unsigned long *)dest;
+	src_word = (const unsigned long *)src;
+	while (n >= sizeof(unsigned long))
 	{
-		while (--size && *src)
-			*dst++ = *src++;
-		*dst = '\0';
+		*dest_word++ = *src_word++;
+		n -= sizeof(unsigned long);
 	}
-	return (src_len);
+	dest_byte = (unsigned char *)dest_word;
+	src_byte = (const unsigned char *)src_word;
+	while (n--)
+		*dest_byte++ = *src_byte++;
+	return (dest);
 }
 
 char	*ft_strdup(const char *s)
 {
 	char	*str;
-	size_t	size;
+	size_t	len;
 
 	if (!s)
 		return (NULL);
-	size = ft_strlen(s) + 1;
-	str = malloc(sizeof(char) * size);
+	len = ft_strlen(s);
+	str = malloc(sizeof(char) * (len + 1));
 	if (!str)
 		return (NULL);
-	ft_strlcpy(str, s, size);
+	ft_memcpy(str, s, len);
+	str[len] = '\0';
 	return (str);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin_with_len(const char *s1, const char *s2,
+	size_t s1_len, size_t s2_len)
 {
-	size_t	s1_len;
-	size_t	s2_len;
 	char	*str;
 
 	if (!s1 || !s2)
 		return (NULL);
-	s1_len = ft_strlen(s1);
-	s2_len = ft_strlen(s2);
 	str = malloc(sizeof(char) * (s1_len + s2_len + 1));
 	if (!str)
 		return (NULL);
-	ft_strlcpy(str, s1, s1_len + 1);
-	ft_strlcpy(str + s1_len, s2, s2_len + 1);
+	ft_memcpy(str, s1, s1_len);
+	ft_memcpy(str + s1_len, s2, s2_len);
+	str[s1_len + s2_len] = '\0';
 	return (str);
 }
